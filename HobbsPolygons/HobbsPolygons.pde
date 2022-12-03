@@ -61,7 +61,7 @@ void draw() {
 }
 
 int permute_colour(int base) {
-  int colour = base + int(random(-25, 25));
+  int colour = base + int(random(-100, 100));
   if (colour < 1) {
     colour = 1;
   }
@@ -99,15 +99,13 @@ float[][] generateGridCentres(float dim1, float dim2, int num1, int num2) {
 
 PShape radiallyDeformedPolygon(float x, float y, float radius, int npoints, int[] colours, float opacity) {
   float [][] radials = baseRadials(npoints, radius);
-  // Now we deform
-  float[][] deformed_radials = 
-    deformRadials(
-      deformRadials(
-        deformRadials(
-          radials
-        )
-      )
-    );
+  int num_deformations = 3;
+  int i = 0;
+  float[][] deformed_radials = radials;
+  while (i < num_deformations) {
+    deformed_radials = deformRadials(deformed_radials);
+    i++;
+  }
   return finalPolygon(x, y, deformed_radials, colours, opacity);
 }
 
