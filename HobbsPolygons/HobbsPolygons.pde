@@ -6,7 +6,7 @@ void setup() {
   size(1000, 800);
   float radius = 20;
   float opacity = 40;
-  int num = 7;
+  int num = 42;
   int layers = 20;
   int npoints = 20;
   noStroke();
@@ -19,14 +19,20 @@ void setup() {
     {64, 224, 208} //turquoise.
   };*/
   
-  float[][] centres = baseRadials(num, 300);
+  //float[][] radial_centres = baseRadials(num, 300);
+  
+  float[][] centre_locations = generateGridCentres(dim1, dim2, 7, 6);
 
   
   for (int i = 0; i < num; i++) {
-    float sx = dim1/2 + cos(centres[i][0]) * centres[i][1];
-    float sy = dim2/2 + sin(centres[i][0]) * centres[i][1];
+    //float sx = dim1/2 + cos(radial_centres[i][0]) * radial_centres[i][1];
+    //float sy = dim2/2 + sin(radial_centres[i][0]) * radial_centres[i][1];
+    
     //float sx = random(100, dim1 - 100);
     //float sy = random(100, dim2 - 100);
+    
+    float sx = centre_locations[i][0];
+    float sy = centre_locations[i][1];
 
     int[] base_colour = {int(random(255)), int(random(255)), int(random(255))};
     float base_radius = radius;
@@ -38,7 +44,7 @@ void setup() {
       }
       PShape poly;
       poly = radiallyDeformedPolygon(sx, sy, base_radius, npoints, permuted_colour, base_opacity);
-      base_radius = base_radius + 5;
+      base_radius = base_radius + 2;
       base_opacity = base_opacity - 1;
       polygons[i][j] = poly;
     }
@@ -63,6 +69,26 @@ int permute_colour(int base) {
     colour = 255;
   }
   return colour;
+}
+
+float[][] generateGridCentres(float dim1, float dim2, int num1, int num2) {
+  int num = num1 * num2;
+  float[][] centres = new float[num][2];
+  float x_step = dim1/(num1 + 1);
+  float y_step = dim2/(num2 + 1);
+  int index = 0;
+  float x_offset = x_step;
+  for (int i = 0; i < num1; i++) {
+    float y_offset = y_step;
+    for (int j =0; j < num2; j++) {
+      centres[index][0] = x_offset;
+      centres[index][1] = y_offset;
+      y_offset += y_step;
+      index++;
+    }
+    x_offset += x_step;
+  }
+  return centres;
 }
 
 // Method : Radially deformed polygon.
