@@ -61,14 +61,7 @@ void draw() {
 }
 
 int permute_colour(int base) {
-  int colour = base + int(random(-100, 100));
-  if (colour < 1) {
-    colour = 1;
-  }
-  if (colour > 255) {
-    colour = 255;
-  }
-  return colour;
+  return constrain(base + int(random(-100, 100)), 1, 255);
 }
 
 float[][] generateGridCentres(float dim1, float dim2, int num1, int num2) {
