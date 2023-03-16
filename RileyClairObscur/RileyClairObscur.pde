@@ -3,40 +3,61 @@
 // 17 triangles high.
 
 int[][][] triangles;
-int xs = 40;
-int ys = 34;
+boolean[][] processedTriangles;
+final int XSIZE = 40;
+final int YSIZE = 34;
+final int BOUNDARY = 40;
+final int XNUM = 30;
+final int YNUM = 17;
+final float RIPPLING_RATE = 0.9;
+final float FLIPPING_RATE = 0.2;
+
+void settings() {
+  size (XSIZE * 30 + BOUNDARY * 2, YSIZE * YNUM + BOUNDARY * 2);
+}
 void setup() {
-  size (1280,658);
-  triangles = new int[31][17][6];
-  for (int j=0; j < 17; j++) {
-    for (int i = 0; i < 31; i++) {
-      int x1 = xs + i * xs;
+  //size (1280,658);
+  triangles = new int[XNUM  + 1][YNUM][6];
+  for (int j=0; j < YNUM; j++) {
+    for (int i = 0; i < XNUM  + 1; i++) {
+      int x1 = XSIZE + i * XSIZE;
       if (j % 2 == 1) {
-        x1 = x1 - xs/2;
+        x1 = x1 - XSIZE/2;
       }
-      int y1 = xs + ys*17 - j*ys;
+      int y1 = XSIZE + YSIZE*YNUM - j*YSIZE;
       triangles[i][j][0] = x1;
       triangles[i][j][1] = y1;   
-      triangles[i][j][2] = x1 + xs;
+      triangles[i][j][2] = x1 + XSIZE;
       triangles[i][j][3] = y1;
-      triangles[i][j][4] = x1 + xs/2;
-      triangles[i][j][5] = y1 - ys;
+      triangles[i][j][4] = x1 + XSIZE/2;
+      triangles[i][j][5] = y1 - YSIZE;
     }
   }
+  noLoop();
 }
 
 void draw() {
+  drawInitialTriangles();
+  //drawClairObscurOriginal();
+  drawClairObscurInspired();
+}
+
+void drawInitialTriangles() {
   background(255);
   fill(0, 0, 0);
-  rect(xs, xs, xs*30, ys*17);
+  rect(XSIZE, XSIZE, XSIZE*XNUM, YSIZE*YNUM);
   fill(255, 255, 255);
   noStroke();
-  for (int i = 0; i < 31; i++) {
-    for (int j = 0; j < 17; j++) {
+  for (int i = 0; i < XNUM  + 1; i++) {
+    for (int j = 0; j < YNUM; j++) {
       int[] coords = triangles[i][j];
       triangle(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
     }
   }
+}
+
+// The original Clair Obscur set, done manually.
+void drawClairObscurOriginal() {
   int [][] whiteArcs = { 
     {5,0},
     {1,1},{5,1},{7,1},{20,1},{22,1},{24,1},{29,1},
@@ -79,23 +100,77 @@ void draw() {
   }
 }
 
-void whiteArcify(int i, int j) {
-  int x = xs + i * xs + xs;
-  if (j % 2 == 1) {
-    x = x - xs/2;
+void drawClairObscurInspired() {
+  processedTriangles = new boolean[XNUM+1][YNUM];
+  final int NUM_ITERATIONS = 20;
+  int iter = 0;
+  while (iter < NUM_ITERATIONS) {
+    int i = int(random(XNUM + 1));
+    int j = int(random(YNUM));
+    if (processedTriangles[i][j]) {
+      continue;
+    }
+    ripple(i, j, true);
+    iter++;
   }
-  int y = xs + ys * 17 - j*ys;
+}
+
+void ripple(int i, int j, boolean preferBlack) {
+  if (boundaryFail(i, j)) {
+    return;
+  }
+  if (processedTriangles[i][j]) {
+    return;
+  }
+  // Step 1: Choose which type of arc
+  boolean ignorePref = (random(1) < FLIPPING_RATE);
+  boolean newPreferBlack = false;
+  if (preferBlack && ignorePref) {
+    whiteArcify(i,j);
+    newPreferBlack = true;
+  } else if (!preferBlack && !ignorePref) {
+    whiteArcify(i, j);
+    newPreferBlack = true;
+  } else {
+    blackArcify(i, j);
+    newPreferBlack = false;
+  }
+  processedTriangles[i][j] = true;
+  
+  if (random(1) < RIPPLING_RATE) {
+    ripple(i+1, j+1, newPreferBlack);
+    ripple(i-1, j-1, newPreferBlack);
+  }
+}
+
+boolean boundaryFail(int i, int j) {
+  if (i < 0 || i >= XNUM + 1 || j < 0 || j >= YNUM) {
+    return true;
+  }
+  return false;
+}
+
+void whiteArcify(int i, int j) {
+  int x = XSIZE + i * XSIZE + XSIZE;
+  if (j % 2 == 1) {
+    x = x - XSIZE/2;
+  }
+  int y = XSIZE + YSIZE * YNUM - j*YSIZE;
   fill(255, 255, 255);
   //fill(120, 190, 33);
   arc (x, y, 80, 80, PI, 4*PI/3, PIE);
 }
 
 void blackArcify(int i, int j) {
-  int x = i * xs + xs/2;
-  if (j % 2 == 1) {
-    x = x - xs/2;
+  if (i == 0 || i >= XNUM) {
+    // cannot blackArcify right now
+    return;
   }
-  int y = xs + ys*17 - j*ys -ys;
+  int x = i * XSIZE + XSIZE/2;
+  if (j % 2 == 1) {
+    x = x - XSIZE/2;
+  }
+  int y = XSIZE + YSIZE*YNUM - j*YSIZE -YSIZE;
   fill(0, 0, 0);
   //fill(64, 224, 208);
   arc (x, y, 80, 80, 0, PI/3, PIE);
