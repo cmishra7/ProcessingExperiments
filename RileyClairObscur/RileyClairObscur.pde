@@ -3,6 +3,7 @@
 // 17 triangles high.
 
 int[][][] triangles;
+
 boolean[][] processedTriangles;
 final int XSIZE = 40;
 final int YSIZE = 34;
@@ -10,7 +11,7 @@ final int BOUNDARY = 40;
 final int XNUM = 30;
 final int YNUM = 17;
 final float RIPPLING_RATE = 0.9;
-final float FLIPPING_RATE = 0.2;
+final float IGNORE_FLIPPING_PREF_RATE = 0.1;
 
 void settings() {
   size (XSIZE * 30 + BOUNDARY * 2, YSIZE * YNUM + BOUNDARY * 2);
@@ -33,17 +34,20 @@ void setup() {
       triangles[i][j][5] = y1 - YSIZE;
     }
   }
+
   noLoop();
 }
 
 void draw() {
   drawInitialTriangles();
+  recolourDarkTriangles();
   //drawClairObscurOriginal();
-  drawClairObscurInspired();
+  //drawClairObscurInspired();
 }
 
 void drawInitialTriangles() {
   background(255);
+  noStroke();
   fill(0, 0, 0);
   rect(XSIZE, XSIZE, XSIZE*XNUM, YSIZE*YNUM);
   fill(255, 255, 255);
@@ -52,6 +56,17 @@ void drawInitialTriangles() {
     for (int j = 0; j < YNUM; j++) {
       int[] coords = triangles[i][j];
       triangle(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5]);
+    }
+  }
+}
+
+void recolourDarkTriangles() {
+  fill(64, 224, 208);
+  noStroke();
+  for (int i = 0; i < XNUM  + 1; i++) {
+    for (int j = 0; j < YNUM; j++) {
+      int[] coords = triangles[i][j];
+      triangle(coords[0], coords[1], coords[2]  - 2 * XSIZE, coords[3] - YSIZE, coords[4], coords[5]);
     }
   }
 }
@@ -102,7 +117,7 @@ void drawClairObscurOriginal() {
 
 void drawClairObscurInspired() {
   processedTriangles = new boolean[XNUM+1][YNUM];
-  final int NUM_ITERATIONS = 20;
+  final int NUM_ITERATIONS = 40;
   int iter = 0;
   while (iter < NUM_ITERATIONS) {
     int i = int(random(XNUM + 1));
@@ -110,7 +125,7 @@ void drawClairObscurInspired() {
     if (processedTriangles[i][j]) {
       continue;
     }
-    ripple(i, j, true);
+    ripple(i, j, false);
     iter++;
   }
 }
@@ -123,7 +138,7 @@ void ripple(int i, int j, boolean preferBlack) {
     return;
   }
   // Step 1: Choose which type of arc
-  boolean ignorePref = (random(1) < FLIPPING_RATE);
+  boolean ignorePref = (random(1) < IGNORE_FLIPPING_PREF_RATE);
   boolean newPreferBlack = false;
   if (preferBlack && ignorePref) {
     whiteArcify(i,j);
