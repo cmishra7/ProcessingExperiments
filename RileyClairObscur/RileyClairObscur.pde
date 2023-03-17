@@ -5,6 +5,8 @@
 int[][][] triangles;
 
 boolean[][] processedTriangles;
+color[] palette;
+
 final int XSIZE = 40;
 final int YSIZE = 34;
 final int BOUNDARY = 40;
@@ -34,7 +36,28 @@ void setup() {
       triangles[i][j][5] = y1 - YSIZE;
     }
   }
-
+  
+  palette = new color[5];
+  /*palette[0] = #75824A;
+  palette[1] = #F6A9C9;
+  palette[2] = #BF6D91;
+  palette[3] = #697E79;
+  palette[4] = #2F281E;*/
+  /*palette[0] = #D2D6D7;
+  palette[1] = #A79797;
+  palette[2] = #4C555A;
+  palette[3] = #13392F;
+  palette[4] = #332200;*/
+  /*palette[0] = #DDDBB4;
+  palette[1] = #94B6B7;
+  palette[2] = #6f8c6E;
+  palette[3] = #365f63;
+  palette[4] = #131419;*/
+  palette[0] = #A2A29A;
+  palette[1] = #AF838D;
+  palette[2] = #C34655;
+  palette[3] = #476A7E;
+  palette[4] = #3F4C55;
   noLoop();
 }
 
@@ -42,7 +65,7 @@ void draw() {
   drawInitialTriangles();
   recolourDarkTriangles();
   //drawClairObscurOriginal();
-  //drawClairObscurInspired();
+  drawClairObscurInspired();
 }
 
 void drawInitialTriangles() {
@@ -61,14 +84,20 @@ void drawInitialTriangles() {
 }
 
 void recolourDarkTriangles() {
-  fill(64, 224, 208);
   noStroke();
   for (int i = 0; i < XNUM  + 1; i++) {
     for (int j = 0; j < YNUM; j++) {
       int[] coords = triangles[i][j];
-      triangle(coords[0], coords[1], coords[2]  - 2 * XSIZE, coords[3] - YSIZE, coords[4], coords[5]);
+      fill(getRandomColourFromPalette());
+      triangle(coords[0], coords[1], coords[2]  - 3 * XSIZE/2, coords[3] - YSIZE, coords[4], coords[5]);
     }
   }
+  // paint boundary again
+  fill(255,255,255);
+  rect(0, 0, BOUNDARY, height);
+  rect(0, 0, width, BOUNDARY);
+  rect(0, height - BOUNDARY, width, BOUNDARY);
+  rect(width - BOUNDARY, 0, BOUNDARY, height);
 }
 
 // The original Clair Obscur set, done manually.
@@ -186,7 +215,12 @@ void blackArcify(int i, int j) {
     x = x - XSIZE/2;
   }
   int y = XSIZE + YSIZE*YNUM - j*YSIZE -YSIZE;
-  fill(0, 0, 0);
+  
+  fill(get(x+1,y+1));
   //fill(64, 224, 208);
   arc (x, y, 80, 80, 0, PI/3, PIE);
+}
+
+color getRandomColourFromPalette() {
+  return(palette[int(random(palette.length))]);
 }
