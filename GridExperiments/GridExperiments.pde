@@ -1,7 +1,8 @@
-int scl = 128;
-int margin = 20;
-int step = 5;
-int x_scl = 64;
+int scl = 50;
+int margin = 40;
+int step = 2;
+int x_scl = 45;
+int thickness = 10;
 
 PVector[][] horz_lines;
 PVector[][] vert_lines;
@@ -10,7 +11,7 @@ PVector[][] vert_lines;
 color[] palette;
 
 void setup() {
-  size(768, 1024);
+  size(450, 800);
   background(255);
   
   int num = ceil(height/scl);
@@ -19,11 +20,11 @@ void setup() {
   vert_lines = new PVector[num][2];
   
   palette = new color[5];
-  palette[0] = #A2A29A;
-  palette[1] = #AF838D;
-  palette[2] = #C34655;
-  palette[3] = #476A7E;
-  palette[4] = #3F4C55;
+  palette[0] = #DDDBB4;
+  palette[1] = #94B6B7;
+  palette[2] = #6f8c6E;
+  palette[3] = #365f63;
+  palette[4] = #131419;
 }
 
 void draw() {
@@ -61,10 +62,10 @@ void draw() {
     for (float x = 0; x < width; x += step) {
       float y = horz_lines[i][0].y + y_delta * x / width;
       println(y);
-      stroke(pal, map(noise(xoff, yoff, 50), 0, 1, 40, 60));
+      stroke(pal, map(noise(xoff, yoff, 50), 0, 1, 90, 100));
       strokeWeight(step);
-      float top_y = y + map(noise(xoff, yoff, 0), 0, 1, 0, 10);
-      float bottom_y = y - map(noise(xoff, yoff, 100), 0, 1, 0, 10);
+      float top_y = y + map(noise(xoff, yoff, 0), 0, 1, 0, thickness);
+      float bottom_y = y - map(noise(xoff, yoff, 100), 0, 1, 0, thickness);
       line(x, top_y, x, bottom_y);
       xoff += inc;
     }
@@ -97,8 +98,8 @@ void draw() {
       float x = vert_lines[i][0].x + x_delta * y / height;
       stroke(pal, map(noise(xoff, yoff, 50), 0, 1, 90, 100));
       strokeWeight(step);
-      float left_x = x + map(noise(xoff, yoff, 0), 0, 1, 0, 10);
-      float right_x = x - map(noise(xoff, yoff, 100), 0, 1, 0, 10);
+      float left_x = x + map(noise(xoff, yoff, 0), 0, 1, 0, thickness);
+      float right_x = x - map(noise(xoff, yoff, 100), 0, 1, 0, thickness);
       line(left_x, y, right_x, y);
       xoff += inc;
     }
