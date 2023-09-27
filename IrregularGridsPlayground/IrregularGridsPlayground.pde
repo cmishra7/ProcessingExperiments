@@ -1,24 +1,32 @@
 color[] palette;
-int MAX_TILE_WIDTH = 10;
-int MAX_TILE_HEIGHT = 10;
+int MAX_TILE_WIDTH = 20;
+int MAX_TILE_HEIGHT = 20;
 Board board;
+ColorPalette PAL_A;
+float PERSISTENCE = 0.5f;   
+float FILL_THRESHOLD = 0.4;
+float NOISE_SCALE = 1;
+float BOUNDARY = 4;
 
 void setup() {  
+  // fraserburgh
   palette = new color[5];
-  palette[0] = #75824A;
-  palette[1] = #F6A9C9;
-  palette[2] = #BF6D91;
-  palette[3] = #697E79;
-  palette[4] = #2F281E;
+  palette[0] = #c64830;
+  palette[1] = #fbd67d;
+  palette[2] = #598b42;
+  palette[3] = #aca68c;
+  palette[4] = #a0acb8;
   
-  board = new Board(0, 0, 80, 80, 10);
+  PAL_A = new ColorPalette(palette);
+  board = new Board(0, 0, 320, 480, 10);
   board.fillBoard();
-  size(800, 800);
+  size(1200, 800);
   noLoop();
 }
 
 void draw() {
   background(255);
+  scale(0.25);
   board.render();
 }
 
@@ -101,8 +109,16 @@ class TileRect {
     float lY = y * tileSize;
     float lW = w * tileSize;
     float lH = h * tileSize;
-    fill(this.c);
-    rect(lX, lY, lW, lH);
+    
+    float n = noise(lX * NOISE_SCALE, lY * NOISE_SCALE);
+    if (n > FILL_THRESHOLD) {
+      stroke(255);
+      fill(this.c);
+    } else {
+      stroke(this.c);
+      noFill();
+    }
+    rect(lX + BOUNDARY, lY + BOUNDARY, lW - BOUNDARY, lH - BOUNDARY);
   }
 }
 
@@ -124,7 +140,7 @@ class Board {
   }
 
   TileRect tryPlaceTile(int startX, int startY, int startWidth, int startHeight) {
-    TileRect tr = new TileRect(startX, startY, startWidth, startHeight,  palette[(int) random(0, 4.9999)], tileSize);  
+    TileRect tr = new TileRect(startX, startY, startWidth, startHeight,  PAL_A.getRandomColor(), tileSize);  
        while (startWidth > 0 && startHeight > 0) {
           if (tr.checkIsValid(board)) {
               tr.place(board);
@@ -156,5 +172,17 @@ class Board {
         }    
       }
     }     
+  }
+}
+
+class ColorPalette {
+  color[] colors;
+  
+  ColorPalette(color[] colors) {
+    this.colors = colors;
+  }
+  
+  color getRandomColor() {
+    return colors[(int) random(colors.length)];
   }
 }
