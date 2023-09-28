@@ -6,11 +6,23 @@ ColorPalette PAL_A;
 float PERSISTENCE = 0.5f;   
 float FILL_THRESHOLD = 0.4;
 float NOISE_SCALE = 1;
-float BOUNDARY = 4;
+float PADDING = 10;
+
+color BACKGROUND_COLOR = #E9FFF9;
 
 void setup() {  
-  // fraserburgh
+  generatePalettes();
+  board = new Board(0, 0, 320, 480, 10);
+  board.fillBoard();
+  size(1200, 800);
+  noLoop();
+}
+
+void generatePalettes() {
   palette = new color[5];
+  
+  // fraserburgh
+
   palette[0] = #c64830;
   palette[1] = #fbd67d;
   palette[2] = #598b42;
@@ -18,14 +30,10 @@ void setup() {
   palette[4] = #a0acb8;
   
   PAL_A = new ColorPalette(palette);
-  board = new Board(0, 0, 320, 480, 10);
-  board.fillBoard();
-  size(1200, 800);
-  noLoop();
 }
 
 void draw() {
-  background(255);
+  background(BACKGROUND_COLOR);
   scale(0.25);
   board.render();
 }
@@ -112,13 +120,13 @@ class TileRect {
     
     float n = noise(lX * NOISE_SCALE, lY * NOISE_SCALE);
     if (n > FILL_THRESHOLD) {
-      stroke(255);
+      stroke(BACKGROUND_COLOR);
       fill(this.c);
     } else {
       stroke(this.c);
       noFill();
     }
-    rect(lX + BOUNDARY, lY + BOUNDARY, lW - BOUNDARY, lH - BOUNDARY);
+    rect(lX + PADDING, lY + PADDING, lW - PADDING, lH - PADDING);
   }
 }
 
