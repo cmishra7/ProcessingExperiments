@@ -1,8 +1,8 @@
-int scl = 400;
-int margin = 200;
+int scl = 100;
+int margin = 50;
 int step = 2;
-int x_scl = 240;
-int thickness = 40;
+int x_scl = 100;
+int thickness = 10;
 
 int HEIGHT;
 int WIDTH;
@@ -12,6 +12,10 @@ int cols, rows;
 
 Particle[] particles;
 PVector[][] flowfield;
+
+GridCell[][] gridfield;
+int grid_scl = 10;
+int grid_cols, grid_rows;
 
 float zoff = 0;
 
@@ -24,13 +28,13 @@ ColorPalette PAL_A;
 
 
 void setup() {
-  size(1200, 800);
+  size(400, 400);
   background(255);
   
-  HEIGHT = height * 4;
-  WIDTH = width * 4;
-  //HEIGHT = height;
-  //WIDTH = width;
+  //HEIGHT = height * 4;
+  //WIDTH = width * 4;
+  HEIGHT = height;
+  WIDTH = width;
   
   int num = ceil(HEIGHT/scl);
   horz_lines = new PVector[num][2];
@@ -41,13 +45,32 @@ void setup() {
   cols = ceil(WIDTH/particle_scl);
   rows = ceil(HEIGHT/particle_scl);
   
-  particles = new Particle[10];
+  particles = new Particle[100];
   for (int i = 0; i < particles.length; i++) {
     particles[i] = new Particle();
   }
   
   flowfield = new PVector[cols][rows];
   println(cols + " " + rows);
+  
+  setupCollisionCells();
+}
+
+void setupCollisionCells() {
+  int x = 0;
+  int y = 0;
+  
+  grid_cols = ceil(WIDTH/grid_scl);
+  grid_rows = ceil(HEIGHT/grid_scl);
+  gridfield = new GridCell[grid_cols][grid_rows];
+  for (int j = 0; j < grid_rows; j++) {
+    for (int i = 0; i < grid_cols; i++) {
+      gridfield[i][j] = new GridCell(x, y, grid_scl, grid_scl);
+      x += grid_scl;
+    }
+    y += grid_scl;
+    x = 0;
+  }
 }
 
 void generatePalettes() {
@@ -73,9 +96,11 @@ void generatePalettes() {
 
 void draw() {
   //noLoop();
-  scale(0.25);
-  if (frameCount == 1)
+  //scale(0.25);
+  if (frameCount == 1) {
     drawTheGrid();
+    checkOccupiedCells();    
+  }
   
   
   // Now animate the particles
@@ -161,6 +186,30 @@ void drawTheGrid() {
   }
 }
 
+void checkOccupiedCells() {
+  for (int j = 0; j < grid_rows; j++) {
+    for (int i = 0; i < grid_cols; i++) {
+      GridCell c = gridfield[i][j];
+      if(isRectOccupied(c.x, c.y, c.w, c.h)) {
+        c.occupied = true;
+      }
+    }
+  }
+  fill(64, 224, 208, 20);
+  for (int j = 0; j < grid_rows; j++) {
+    for (int i = 0; i < grid_cols; i++) {
+      GridCell c = gridfield[i][j];
+      if(c.occupied) {
+        rect(c.x, c.y, c.w, c.h);
+      }
+    }
+  }
+}
+
+GridCell getGridCellForCoordinate(int x, int y) {
+  return gridfield[floor(x/grid_scl)][floor(y/grid_scl)];
+}
+
 void danceWithParticles() {
   
   //println("in DWP "+ frameCount);
@@ -201,10 +250,22 @@ boolean isPixelOccupied(int x, int y) {
   loadPixels();
   int addr = x + y * width;
   color col = pixels[addr];
+  //println(hex(col));
   if (red(col) == 255 && green(col) == 255 && blue(col) == 255)
     return false;
   return true;
 }
+
+boolean isRectOccupied(int x, int y, int w, int h) {
+  for (int r = y; r < y + h; r++) {
+    for (int c = x; c < x + w; c++) {
+      if (isPixelOccupied(c, r)) 
+        return true;
+    }
+  }
+  return false;
+}
+
 
 class ColorPalette {
   color[] colors;
@@ -221,10 +282,17 @@ class ColorPalette {
 
 class Particle {
   PVector pos, vel, acc, prev;
-  float maxSpeed = 100;
+  float maxSpeed = 1;
   
   Particle() {
-    pos = new PVector(random(WIDTH), random(HEIGHT));
+    while (true) {
+      pos = new PVector(random(WIDTH), random(HEIGHT));
+      GridCell c = getGridCellForCoordinate(floor(pos.x), floor(pos.y));
+      if (!c.occupied) {
+        break;
+      }
+    }
+    
     vel = new PVector(0, 0);
     acc = new PVector(0, 0);
     prev = pos.copy();
@@ -250,39 +318,78 @@ class Particle {
   
   void show() {
     //println("drawing something "+frameCount);
-    stroke(0, 90);
+    stroke(0, 25);
     strokeWeight(1);
     edges();
-    line (pos.x, pos.y, prev.x, prev.y);
-    //point(pos.x, pos.y);
+    //line (pos.x, pos.y, prev.x, prev.y);
+    point(pos.x, pos.y);
     updatePrev();
   }
   
   void edges() {
-    
+    boolean hitBoundary = false;
     if (pos.x >= WIDTH) {
-      pos.x = 1;
-      updatePrev();
+      pos.x = prev.x;
+      vel.x = -0.1 * vel.x;
+      //updatePrev();
+      hitBoundary = true;
     }
     if (pos.x <= 0) {
-      pos.x = WIDTH - 1;
-      updatePrev();  
+      pos.x = prev.x;
+      vel.x = -0.1 * vel.x;
+      //updatePrev();
+            hitBoundary = true;
+
     }
     if (pos.y >= HEIGHT) {
-      pos.y = 1;
-      updatePrev();
+      pos.y = prev.y;
+      vel.y = -0.1 * vel.y;
+      //updatePrev();
+            hitBoundary = true;
+
     }
     if (pos.y <= 0) {
-      pos.y = HEIGHT - 1;
-      updatePrev();
+      pos.y = prev.y;
+      vel.y = -0.1 * vel.y;
+      //updatePrev();
+            hitBoundary = true;
+
     }
     
-    if (isPixelOccupied(floor(pos.x/4), floor(pos.y/4))) {
-      pos.x = random(WIDTH);
-      pos.y = random(HEIGHT);
+    if (!hitBoundary) {
+      // Check grid collision
+      GridCell c = getGridCellForCoordinate(floor(pos.x), floor(pos.y));
+      if (c.occupied) {
+        pos.x = prev.x;
+        pos.y = prev.y;
+        vel.x = -0.1 * vel.x;
+        vel.y = -0.1 * vel.y;
+      }
+    }
+    
+    if (isPixelOccupied(floor(pos.x), floor(pos.y))) {
+      //println("hit pixel occupied");
+      //println(pos.x + " " + pos.y + " " + vel.x + " " + vel.y);
+      //pos.x = random(WIDTH);
+      //pos.y = random(HEIGHT);
+      vel.x = -1 * vel.x;
+      vel.y = -1 * vel.y;
+
       updatePrev();
     }
 
-  }
+  } 
+}
+
+class GridCell {
+  int x, y, w, h;
+  Boolean occupied;
   
+  GridCell(int x, int y, int w, int h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    occupied = false;
+  }
 }
