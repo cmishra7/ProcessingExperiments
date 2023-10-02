@@ -1,20 +1,20 @@
-int scl = 100;
+int y_scl = 100;
 int margin = 50;
 int step = 2;
 int x_scl = 100;
-int thickness = 10;
+int thickness = 40;
 
 int HEIGHT;
 int WIDTH;
 
 int particle_scl = 25;
-int cols, rows;
+int particle_cols, particle_rows;
 
 Particle[] particles;
 PVector[][] flowfield;
 
 GridCell[][] gridfield;
-int grid_scl = 10;
+int grid_scl = 1;
 int grid_cols, grid_rows;
 
 float zoff = 0;
@@ -22,36 +22,40 @@ float zoff = 0;
 PVector[][] horz_lines;
 PVector[][] vert_lines;
 
+// When you change one change the other.
+int FACTOR = 4;
+float INV_FACTOR = 1/(float)FACTOR;
+
+int NUM_PARTICLES = 50000;
+
 
 
 ColorPalette PAL_A;
+ColorPalette PAL_B;
 
 
 void setup() {
-  size(400, 400);
+  size(1200, 800);
   background(255);
   
-  //HEIGHT = height * 4;
-  //WIDTH = width * 4;
-  HEIGHT = height;
-  WIDTH = width;
+  HEIGHT = height * FACTOR;
+  WIDTH = width * FACTOR;
+  //HEIGHT = height;
+  //WIDTH = width;
   
-  int num = ceil(HEIGHT/scl);
+  int num = ceil(HEIGHT/y_scl);
   horz_lines = new PVector[num][2];
   num = ceil(WIDTH/x_scl);
   vert_lines = new PVector[num][2];
   generatePalettes();
 
-  cols = ceil(WIDTH/particle_scl);
-  rows = ceil(HEIGHT/particle_scl);
+  particle_cols = ceil(WIDTH/particle_scl);
+  particle_rows = ceil(HEIGHT/particle_scl);
   
-  particles = new Particle[100];
-  for (int i = 0; i < particles.length; i++) {
-    particles[i] = new Particle();
-  }
+  particles = new Particle[NUM_PARTICLES];
   
-  flowfield = new PVector[cols][rows];
-  println(cols + " " + rows);
+  flowfield = new PVector[particle_cols][particle_rows];
+  println(particle_cols + " " + particle_rows);
   
   setupCollisionCells();
 }
@@ -74,10 +78,10 @@ void setupCollisionCells() {
 }
 
 void generatePalettes() {
-  color[] palette = new color[5];
-  /*
+  //color[] palette = new color[5];
+  
   // fraserburgh
-  palette[0] = #c64830;
+  /*palette[0] = #c64830;
   palette[1] = #fbd67d;
   palette[2] = #598b42;
   palette[3] = #aca68c;
@@ -85,37 +89,55 @@ void generatePalettes() {
   
   //auchenblae
   
-  palette[0] = #dddbb4;
+  /*palette[0] = #dddbb4;
   palette[1] = #94b6b7;
   palette[2] = #6f8c6e;
   palette[3] = #365f63;
-  palette[4] = #131419;
+  palette[4] = #131419;*/
+  
+  color[] palette = new color[3];
+  palette[0] = #c64830;
+  palette[1] = #fbd67d;
+  palette[2] = #598b42;
   
   PAL_A = new ColorPalette(palette);
+  
+  color[] palette2 = new color[2];
+  palette2[0] = #aca68c;
+  palette2[1] = #a0acb8;
+  
+  PAL_B = new ColorPalette(palette2);
 }
 
 void draw() {
   //noLoop();
-  //scale(0.25);
+  scale(INV_FACTOR);
   if (frameCount == 1) {
-    drawTheGrid();
-    checkOccupiedCells();    
+    drawPaintedGrid();
+    checkOccupiedCells();
+    // Now initialize particles
+    for (int i = 0; i < particles.length; i++) {
+      particles[i] = new Particle();
+    }
   }
-  
   
   // Now animate the particles
   danceWithParticles(); 
+  if (frameCount % 10 == 0) {
+    println(frameCount);
+  }
 }
 
-void drawTheGrid() {
+void drawPaintedGrid() {
+  noStroke();
   float yoff = 0;
   float inc = 5;
   
   int curr = 0;
   
-  strokeWeight(6);
-  for (int y = 0; y < HEIGHT; y+= scl) {
-    float y_left = y + map(noise(1, yoff), 0, 1, scl -  3*margin, scl - margin);
+  //strokeWeight(6);
+  for (int y = 0; y < HEIGHT; y+= y_scl) {
+    float y_left = y + map(noise(1, yoff), 0, 1, y_scl -  3*margin, y_scl - margin);
     float y_right = y + map(noise(WIDTH, yoff), 0, 1, margin, 3 * margin);
     //line(0, y_left, WIDTH, y_right);
     println(y + " " + y_left + " " + y_right);    
@@ -152,12 +174,12 @@ void drawTheGrid() {
   xoff = 0;
   inc = 0.2;
 
-  stroke(0, 10);
+  //stroke(0, 10);
   curr = 0;
   for (int x = 0; x < WIDTH; x+= x_scl) {
     float x_top = x + map(noise(xoff, 1), 0, 1, 0, x_scl/2);
     float x_bottom = x + map(noise(xoff, HEIGHT), 0, 1, x_scl/2, x_scl);
-    line(x_top, 0, x_bottom, HEIGHT);
+    //line(x_top, 0, x_bottom, HEIGHT);
     xoff += inc;
     vert_lines[curr][0] = new PVector(x_top, 0);
     vert_lines[curr][1] = new PVector(x_bottom, HEIGHT);
@@ -172,9 +194,8 @@ void drawTheGrid() {
     float x_delta = vert_lines[i][1].x - vert_lines[i][0].x;
     for (float y = 0; y < HEIGHT; y += step) {
       xoff += inc;
-      
-      float alpha = map(noise(xoff + 10000, 1000), 0, 1, 80, 100);
-      if (alpha < 85)
+      float alpha = map(noise(xoff + 10000, 1000), 0, 1, 90, 100);
+      if (alpha < 94)
         continue;
       float x = vert_lines[i][0].x + x_delta * y / HEIGHT;
       stroke(pal, alpha);
@@ -187,6 +208,7 @@ void drawTheGrid() {
 }
 
 void checkOccupiedCells() {
+  loadPixels();
   for (int j = 0; j < grid_rows; j++) {
     for (int i = 0; i < grid_cols; i++) {
       GridCell c = gridfield[i][j];
@@ -195,6 +217,8 @@ void checkOccupiedCells() {
       }
     }
   }
+  
+  /*
   fill(64, 224, 208, 20);
   for (int j = 0; j < grid_rows; j++) {
     for (int i = 0; i < grid_cols; i++) {
@@ -204,6 +228,7 @@ void checkOccupiedCells() {
       }
     }
   }
+  */
 }
 
 GridCell getGridCellForCoordinate(int x, int y) {
@@ -215,9 +240,9 @@ void danceWithParticles() {
   //println("in DWP "+ frameCount);
   float inc = 0.1;
   float yoff = 0;
-  for (int y = 0; y < rows; y++) {
+  for (int y = 0; y < particle_rows; y++) {
     float xoff = 0;
-    for (int x = 0; x < cols; x++) {
+    for (int x = 0; x < particle_cols; x++) {
       float angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
       //println(angle + " " + xoff + " " + yoff);
       PVector v = PVector.fromAngle(angle);
@@ -247,8 +272,17 @@ void follow(Particle p) {
 }
 
 boolean isPixelOccupied(int x, int y) {
-  loadPixels();
-  int addr = x + y * width;
+  //loadPixels();
+  // assumes pixels are loaded.
+  int x_t = floor(x/FACTOR);
+  int y_t = floor(y/FACTOR);
+  if (x_t >= width || y_t >= height) {
+    println("explode " + x_t + " " +y_t);
+  }
+  int addr = x_t + y_t * width;
+  if (addr >= pixels.length) {
+    println("explode2 " + x_t + " " +y_t);
+  }
   color col = pixels[addr];
   //println(hex(col));
   if (red(col) == 255 && green(col) == 255 && blue(col) == 255)
@@ -257,9 +291,10 @@ boolean isPixelOccupied(int x, int y) {
 }
 
 boolean isRectOccupied(int x, int y, int w, int h) {
+  //return false;
   for (int r = y; r < y + h; r++) {
     for (int c = x; c < x + w; c++) {
-      if (isPixelOccupied(c, r)) 
+      if (isPixelOccupied(x, y)) 
         return true;
     }
   }
@@ -276,13 +311,16 @@ class ColorPalette {
   
   color getRandomColor() {
     return colors[(int) random(colors.length)];
+    //return colors[colors.length - 1];
+
   }
 }
 
 
 class Particle {
   PVector pos, vel, acc, prev;
-  float maxSpeed = 1;
+  float maxSpeed = 2;
+  color c;
   
   Particle() {
     while (true) {
@@ -296,6 +334,7 @@ class Particle {
     vel = new PVector(0, 0);
     acc = new PVector(0, 0);
     prev = pos.copy();
+    c = PAL_B.getRandomColor();
   }
   
   void update() {
@@ -318,11 +357,11 @@ class Particle {
   
   void show() {
     //println("drawing something "+frameCount);
-    stroke(0, 25);
+    stroke(c, 5);
     strokeWeight(1);
     edges();
-    //line (pos.x, pos.y, prev.x, prev.y);
-    point(pos.x, pos.y);
+    line (pos.x, pos.y, prev.x, prev.y);
+    //point(pos.x, pos.y);
     updatePrev();
   }
   
@@ -338,21 +377,21 @@ class Particle {
       pos.x = prev.x;
       vel.x = -0.1 * vel.x;
       //updatePrev();
-            hitBoundary = true;
+      hitBoundary = true;
 
     }
     if (pos.y >= HEIGHT) {
       pos.y = prev.y;
       vel.y = -0.1 * vel.y;
       //updatePrev();
-            hitBoundary = true;
+      hitBoundary = true;
 
     }
     if (pos.y <= 0) {
       pos.y = prev.y;
       vel.y = -0.1 * vel.y;
       //updatePrev();
-            hitBoundary = true;
+      hitBoundary = true;
 
     }
     
