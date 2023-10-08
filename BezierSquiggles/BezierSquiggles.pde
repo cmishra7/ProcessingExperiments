@@ -74,5 +74,36 @@ void draw() {
     rot -= PI/48;
     popMatrix();
   }
-
+  
+  stroke(255, 102, 0);
+  strokeWeight(10);
+  bezier(60, 1120, 1360, 960, 740, 340, 1640, 80);
+  strokeWeight(5);
+  int steps = 300;
+  stroke(0);
+  beginShape();
+  vertex(60, 1120);
+  for (int i = 0; i <= steps; i++) {
+    if (i > 50 && i < steps - 50 && i%2 == 0) {
+      // Weird effect but ok
+      continue;
+    }
+    float t = i / float(steps);
+    float x0 = bezierPoint(60.0, 1360, 740, 1640, t);
+    float y0 = bezierPoint(1120, 960, 340, 80, t);
+    
+    float y1 = y0 - map(noise(xoff), 0, 1, 50, 150);
+    xoff += inc;
+    float x1 = x0 - 10 + map(noise(xoff), 0, 1, -5, 5);
+    xoff += inc;
+    float y2 = y0 - map(noise(xoff), 0, 1, 50, 150);
+    xoff += inc;
+    float x2 = x0 + 10 + map(noise(xoff), 0, 1, -5, 5);
+    xoff += inc;
+    float y3 = y0 + map(noise(xoff), 0, 1, -20, 20);
+    xoff += inc;
+    float x3 = x0 + 5 + map(noise(xoff), 0, 1, -5, 5);
+    bezierVertex(x1, y1, x2, y2, x3, y3);
+  }
+  endShape();
 }
