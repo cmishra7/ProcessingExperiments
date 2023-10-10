@@ -8,7 +8,7 @@ void setup() {
   
   triangles = new ArrayList<Triangle>();
   
-  triangles.add(new Triangle(50, 50, 300, 75, 350, 390));
+  triangles.add(new Triangle(300, 75, 350, 390, 950, 50));
   
   int i = 0;
   while (i < 20) {
@@ -19,7 +19,8 @@ void setup() {
 }
 
 void addANewTriangle() {
-  int index = floor(random(0, triangles.size()));
+  //int index = floor(random(0, triangles.size()));
+  int index = 0;
   Triangle t = triangles.get(index);;
   
   // choose a random vertex.
@@ -28,13 +29,14 @@ void addANewTriangle() {
   PVector v2 = t.getRandomPointOnLine(i);
   PVector v3 = v1.copy();
   v3.add(v2);
-  v3.mult(random(0.5, 1));
+  v3.mult(random(0.25, 1.25));
   // Choose a third point at random;
   triangles.add(new Triangle(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y));
   println("adding "+v1.x + " " +v1.y + " " +v2.x + " " +v2.y + " " + v3.x + " " + v3.y);
 }
 
 void draw() {
+  scale(0.5);
   noFill();
   if (frameCount == 1) {
     drawOutline();
@@ -80,7 +82,7 @@ class Triangle {
     float x = random(0.3, 0.7);
     return new PVector(
       x * (float)vertices[i].x + (1-x) * (float) vertices[(i + 1)%3].x,
-      x * (float)vertices[i].y+ (1-x) * (float) vertices[(i + 1)%3].y
+      x * (float)vertices[i].y + (1-x) * (float) vertices[(i + 1)%3].y
     );
   }
   
