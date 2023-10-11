@@ -1,7 +1,7 @@
-int y_scl = 100;
+int y_scl = 160;
 int margin = 50;
 int step = 2;
-int x_scl = 100;
+int x_scl = 160;
 int thickness = 40;
 
 int HEIGHT;
@@ -26,7 +26,7 @@ PVector[][] vert_lines;
 int FACTOR = 4;
 float INV_FACTOR = 1/(float)FACTOR;
 
-int NUM_PARTICLES = 50000;
+int NUM_PARTICLES = 2000;
 
 
 
@@ -36,7 +36,7 @@ ColorPalette PAL_B;
 
 void setup() {
   size(1200, 800);
-  background(255);
+  background(0);
   
   HEIGHT = height * FACTOR;
   WIDTH = width * FACTOR;
@@ -102,9 +102,10 @@ void generatePalettes() {
   
   PAL_A = new ColorPalette(palette);
   
-  color[] palette2 = new color[2];
-  palette2[0] = #aca68c;
-  palette2[1] = #a0acb8;
+  color[] palette2 = new color[1];
+  //palette2[0] = #aca68c;
+  //palette2[1] = #a0acb8;
+  palette2[0] = #00E6C6;
   
   PAL_B = new ColorPalette(palette2);
 }
@@ -161,7 +162,8 @@ void drawPaintedGrid() {
       float alpha = map(noise(xoff, 1000), 0, 1, 90, 100);
       if (alpha < 94)
         continue;
-      stroke(pal, alpha);
+      //stroke(pal, alpha);
+      stroke(pal);
       strokeWeight(step);
       float top_y = y + map(noise(xoff, yoff, 0), 0, 1, 0, thickness);
       float bottom_y = y - map(noise(xoff, yoff, 100), 0, 1, 0, thickness);
@@ -198,7 +200,8 @@ void drawPaintedGrid() {
       if (alpha < 94)
         continue;
       float x = vert_lines[i][0].x + x_delta * y / HEIGHT;
-      stroke(pal, alpha);
+      //stroke(pal, alpha);
+      stroke(pal);
       strokeWeight(step);
       float left_x = x + map(noise(xoff, yoff, 0), 0, 1, 0, thickness);
       float right_x = x - map(noise(xoff, yoff, 100), 0, 1, 0, thickness);
@@ -285,7 +288,7 @@ boolean isPixelOccupied(int x, int y) {
   }
   color col = pixels[addr];
   //println(hex(col));
-  if (red(col) == 255 && green(col) == 255 && blue(col) == 255)
+  if (red(col) == 0 && green(col) == 0 && blue(col) == 0)
     return false;
   return true;
 }
@@ -357,7 +360,8 @@ class Particle {
   
   void show() {
     //println("drawing something "+frameCount);
-    stroke(c, 5);
+    //stroke(c, 5);
+    stroke(c);
     strokeWeight(1);
     edges();
     line (pos.x, pos.y, prev.x, prev.y);
