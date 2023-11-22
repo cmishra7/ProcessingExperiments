@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "spectral.js": "^2.0.2"
+  }
+}
