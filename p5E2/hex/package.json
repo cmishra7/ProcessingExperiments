@@ -1,0 +1,16 @@
+{
+  "name": "hexagon-tiling-app",
+  "version": "1.0.0",
+  "description": "Express.js app with p5.js hexagon tiling",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "keywords": ["express", "p5js", "hexagon", "tiling"],
+  "author": "",
+  "license": "MIT"
+}

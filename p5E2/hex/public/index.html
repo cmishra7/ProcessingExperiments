@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hexagon Tiling - Express App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #canvas-container {
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #385f5b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #77bfb3;
+        }
+        .info {
+            text-align: center;
+            max-width: 500px;
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hexagon Tiling - Express.js App</h1>
+    <div id="canvas-container"></div>
+    <div>
+        <button onclick="randomizeColors()">Randomize Colors</button>
+        <button onclick="window.location.reload()">Reload Page</button>
+    </div>
+    <div class="info">
+        <p>A 400×400 canvas tiled with hexagons (10px sides each)</p>
+        <p>Colors: #d0cecf, #c1693c, #eb862a, #77bfb3, #385f5b</p>
+        <p>Click "Randomize Colors" or reload the page to see new random colors</p>
+    </div>
+
+    <script src="sketch.js"></script>
+</body>
+</html>
